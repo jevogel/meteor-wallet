@@ -1,0 +1,23 @@
+// .postcssrc.js
+module.exports = ctx => {
+  if (ctx.meteor) {
+    const config = {
+      plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+      },
+    };
+
+    if (ctx.env == 'production') {
+      // "autoprefixer" is reported to be slow,
+      // so we use it only in production.
+      config.plugins.autoprefixer = {
+        overrideBrowserslist: ['defaults',]
+      };
+    }
+
+    return config;
+  } else {
+    return {};
+  }
+};
