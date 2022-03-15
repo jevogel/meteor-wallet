@@ -1,21 +1,47 @@
 import React, { useState } from 'react';
-import { ContactsCollection } from '../api/ContactsCollection';
+import { Meteor } from 'meteor/meteor';
+import { ErrorAlert } from './components/ErrorAlert';
+import { SuccessAlert } from './components/SuccessAlert';
 
 export const ContactForm = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const showError = ({ message }) => {
+    setError(message);
+    setTimeout(() => {
+      setError('');
+    }, 5000);
+  }
+
+  const showSuccess = ({ message }) => {
+    setSuccess(message);
+    setTimeout(() => {
+      setSuccess('');
+    }, 5000);
+  }
 
   const saveContact = e => {
     e.preventDefault();
-    ContactsCollection.insert({ name, email, imageUrl });
-    setName('');
-    setEmail('');
-    setImageUrl('');
+    Meteor.call('contacts.insert', { name, email, imageUrl }, errorResponse => {
+      if (errorResponse) {
+        showError({ message: errorResponse.error });
+      } else {
+        setName('');
+        setEmail('');
+        setImageUrl('');
+        showSuccess({ message: 'Contact saved.'});
+      }
+    });
   }
 
   return (
     <form onSubmit={e => saveContact(e)} className="mt-6">
+      {error && <ErrorAlert message={error} />}
+      {success && <SuccessAlert message={success} />}
       <div className="grid grid-cols-6 gap-6">
         <div className="col-span-6 sm:col-span-6 lg:col-span-2">
           <label
