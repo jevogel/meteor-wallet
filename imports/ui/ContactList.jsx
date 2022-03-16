@@ -5,8 +5,8 @@ import { ErrorAlert } from './components/ErrorAlert';
 import { SuccessAlert } from './components/SuccessAlert';
 
 export const ContactList = () => {
-  const isLoading = useSubscribe('allContacts');
-  const contacts = useFind(() => ContactsCollection.find({}, { sort: { createdAt: -1 } }));
+  const isLoading = useSubscribe('contacts');
+  const contacts = useFind(() => ContactsCollection.find({ archived: { $ne: true }}, { sort: { createdAt: -1 } }));
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -25,17 +25,13 @@ export const ContactList = () => {
     }, 5000);
   }
 
-  // const contacts = useTracker(() => {
-  //   return ContactsCollection.find({}, { sort: { createdAt: -1 }}).fetch();
-  // });
-
-  const removeContact = (event, _id) => {
+  const archiveContact = (event, _id) => {
     event.preventDefault();
-    Meteor.call('contacts.remove', { contactId: _id }, errorResponse => {
+    Meteor.call('contacts.archive', { contactId: _id }, errorResponse => {
       if (errorResponse) {
         showError({ message: errorResponse.error });
       } else {
-        showSuccess({ message: 'Contact removed.' });
+        showSuccess({ message: 'Contact archived.' });
       }
     });
   }
@@ -66,11 +62,11 @@ export const ContactList = () => {
         </div>
         <div>
           <a
-            onClick={event => removeContact(event, contact._id)}
+            onClick={event => archiveContact(event, contact._id)}
             href="#"
             className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
           >
-            Remove
+            Archive
           </a>
         </div>
       </li>
