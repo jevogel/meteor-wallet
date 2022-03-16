@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react';
 import { ContactsCollection } from '../api/ContactsCollection';
-import { useTracker, useSubscribe, useFind } from 'meteor/react-meteor-data';
+import { useSubscribe, useFind } from 'meteor/react-meteor-data';
 import { ErrorAlert } from './components/ErrorAlert';
 import { SuccessAlert } from './components/SuccessAlert';
 
