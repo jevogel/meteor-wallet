@@ -1,13 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ContactsCollection } from '../api/ContactsCollection';
 import { useTracker } from 'meteor/react-meteor-data';
+import { ErrorAlert } from './components/ErrorAlert';
+import { SuccessAlert } from './components/SuccessAlert';
 
 export const ContactList = () => {
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const showError = ({ message }) => {
+    setError(message);
+    setTimeout(() => {
+      setError('');
+    }, 5000);
+  }
+
+  const showSuccess = ({ message }) => {
+    setSuccess(message);
+    setTimeout(() => {
+      setSuccess('');
+    }, 5000);
+  }
+
   const contacts = useTracker(() => {
     return ContactsCollection.find({}, { sort: { createdAt: -1 }}).fetch();
-  })
+  });
+
+  const removeContact = (event, _id) => {
+    event.preventDefault();
+    Meteor.call('contacts.remove', { contactId: _id }, errorResponse => {
+      if (errorResponse) {
+        showError({ message: errorResponse.error });
+      } else {
+        showSuccess({ message: 'Contact removed.'});
+      }
+    });
+  }
+
   return (
     <div>
+      {error && <ErrorAlert message={error} />}
+      {success && <SuccessAlert message={success} />}
       <div className="mt-10">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
           Contact List
@@ -24,6 +57,15 @@ export const ContactList = () => {
                   <p className="text-sm font-medium text-gray-500 truncate">{person.email}</p>
                 </div>
               </div>
+              <div>
+                  <a
+                    onClick={event => removeContact(event, person._id)}
+                    href="#"
+                    className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Remove
+                  </a>
+                </div>
             </li>
           ))}
         </ul>
